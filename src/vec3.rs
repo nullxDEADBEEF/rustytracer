@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
 pub type Point3 = Vec3;
 pub type Color = Vec3;
@@ -14,10 +14,11 @@ impl Color {
     }
 }
 
+#[derive(Default, Copy, Clone)]
 pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
@@ -25,19 +26,11 @@ impl Vec3 {
         Self { x, y, z }
     }
 
-    pub fn zero() -> Self {
-        Self {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }
-    }
-
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    fn length_squared(&self) -> f64 {
+    pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
@@ -62,6 +55,18 @@ impl Vec3 {
             x: self.x / self.length(),
             y: self.y / self.length(),
             z: self.z / self.length(),
+        }
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
         }
     }
 }
@@ -123,6 +128,18 @@ impl Mul<f64> for Vec3 {
             x: self.x * rhs,
             y: self.y * rhs,
             z: self.z * rhs,
+        }
+    }
+}
+
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Self::Output {
+            x: self * rhs.x,
+            y: self * rhs.y,
+            z: self * rhs.z,
         }
     }
 }
