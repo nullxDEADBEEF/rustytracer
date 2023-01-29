@@ -1,15 +1,28 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
+use crate::util::clamp;
+
 pub type Point3 = Vec3;
 pub type Color = Vec3;
 
 impl Color {
-    pub fn write_color(&self) {
+    pub fn write_color(&self, samples_per_pixel: i32) {
+        let mut r = self.x;
+        let mut g = self.y;
+        let mut b = self.z;
+
+        // Divide the color by the number of samples
+        let scale = 1.0 / samples_per_pixel as f64;
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
+        // Write translated [0,255] value of each color component
         println!(
             "{} {} {}",
-            (255.999 * self.x) as i32,
-            (255.999 * self.y) as i32,
-            (255.999 * self.z) as i32
+            (256.0 * clamp(r, 0.0, 0.999)) as i32,
+            (256.0 * clamp(g, 0.0, 0.999)) as i32,
+            (256.0 * clamp(b, 0.0, 0.999)) as i32
         );
     }
 }
