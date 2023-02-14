@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
-use crate::util::clamp;
+use crate::util::{clamp, random_double, random_double_param};
 
 pub type Point3 = Vec3;
 pub type Color = Vec3;
@@ -11,11 +11,14 @@ impl Color {
         let mut g = self.y;
         let mut b = self.z;
 
-        // Divide the color by the number of samples
+        // Divide the color by the number of samples and gamme-correct for gamma=2.0
+        // we have to gamma-correct since many image viewers assume the image is gamma-corrected
+        // meaning the 0 -> 1 values have some transform before being stored as a byte
+        // for now we are doing 50% color reflectors
         let scale = 1.0 / samples_per_pixel as f64;
-        r *= scale;
-        g *= scale;
-        b *= scale;
+        r = (scale * r).sqrt();
+        g = (scale * g).sqrt();
+        b = (scale * b).sqrt();
 
         // Write translated [0,255] value of each color component
         println!(
@@ -68,6 +71,44 @@ impl Vec3 {
             x: self.x / self.length(),
             y: self.y / self.length(),
             z: self.z / self.length(),
+        }
+    }
+
+    #[inline]
+    pub fn random() -> Vec3 {
+        Vec3::new(random_double(), random_double(), random_double())
+    }
+
+    #[inline]
+    pub fn random_min_max(min: f64, max: f64) -> Vec3 {
+        Vec3::new(
+            random_double_param(min, max),
+            random_double_param(min, max),
+            random_double_param(min, max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let p = Vec3::random_min_max(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
+    }
+
+    pub fn random_unit_vector(vec: Vec3) -> Vec3 {
+        vec.unit()
+    }
+
+    pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
+        let in_unit_sphere = Vec3::random_in_unit_sphere();
+        if in_unit_sphere.dot(*normal) > 0.0 {
+            // in the same hemisphere as the normal
+            in_unit_sphere
+        } else {
+            -in_unit_sphere
         }
     }
 }
