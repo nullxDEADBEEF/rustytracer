@@ -1,5 +1,6 @@
 use crate::{
     hittable::{Hit, HitRecord},
+    material::Material,
     ray::Ray,
     vec3::Point3,
 };
@@ -8,13 +9,15 @@ use crate::{
 pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
+    pub material: Material,
 }
 
 impl Sphere {
-    pub fn new(cen: Point3, r: f64) -> Self {
+    pub fn new(cen: Point3, r: f64, material: Material) -> Self {
         Self {
             center: cen,
             radius: r,
+            material,
         }
     }
 }
@@ -45,6 +48,7 @@ impl Hit for Sphere {
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
+        rec.material = self.material;
 
         true
     }
